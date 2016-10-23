@@ -1,16 +1,15 @@
 #include <iostream>
+#include <memory>
+
 using namespace std;
 
 class Context
 {
 public:
-	Context(char* pData)
-		: m_strData(pData) {};
-	const char* GetData()  {
-		return m_strData.c_str();
-	};
+	Context(string str) : m_str(str) {};
+	const char* GetStr()  { return m_str.c_str(); };
 private:
-	string m_strData;
+	string m_str;
 };
 
 class AbstractExpression
@@ -23,7 +22,7 @@ class TerminalExpression : public AbstractExpression
 {
 public:
 	void Interpret(Context* pContext) {
-		cout << "TerminalExpression: " << pContext->GetData() << endl;
+		cout << "TerminalExpression: " << pContext->GetStr() << endl;
 	};
 };
 
@@ -31,21 +30,17 @@ class NonterminalExpression : public AbstractExpression
 {
 public:
 	void Interpret(Context* pContext) {
-		cout << "NonterminalExpression: " << pContext->GetData() << endl;
+		cout << "NonterminalExpression: " << pContext->GetStr() << endl;
 	};
 };
 
 void main()
 {
-	Context* pContext = new Context("Data");
+	auto_ptr<Context> pContext(new Context("Context"));
 
-	AbstractExpression* pTerminal = new TerminalExpression();
-	pTerminal->Interpret(pContext);
+	auto_ptr<AbstractExpression> pTerminal(new TerminalExpression());
+	pTerminal->Interpret(pContext.get());
 
-	AbstractExpression* pNonterminal = new NonterminalExpression();
-	pNonterminal->Interpret(pContext);
-
-	delete pTerminal;
-	delete pNonterminal;
-	delete pContext;
+	auto_ptr<AbstractExpression> pNonterminal(new NonterminalExpression());
+	pNonterminal->Interpret(pContext.get());
 }
